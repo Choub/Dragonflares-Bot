@@ -39,6 +39,10 @@ export class TechDataCommand extends MemberCommand{
             if(isNaN(level)) {
                 embed.setTitle(`**Tech: ${tech.name}**`)
                 embed.setDescription(`${tech.description}\n`)
+                tech.properties.forEach((levels, property) => {
+                    if(!Array.isArray(levels))
+                        embed.addField(`*${property}*`, `${levels}`)
+                });
                 embed.setFooter(`You may add a number between 1 and ${tech.levels} to get info about the required level`)
                 embed.setThumbnail(`${tech.image}`)
                 return message.channel.send(embed)
@@ -53,8 +57,9 @@ export class TechDataCommand extends MemberCommand{
             embed.addField('*Description*', tech.description);
             embed.setThumbnail(tech.image);
 
-            tech.properties.forEach((levels, propery) => {
-                embed.addField(`*${propery}*`, `${levels[level - 1]}`)
+            tech.properties.forEach((levels, property) => {
+                if(Array.isArray(levels))
+                    embed.addField(`*${property}*`, `${levels[level - 1]}`)
             });
             return message.channel.send(embed)
         }

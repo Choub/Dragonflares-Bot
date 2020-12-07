@@ -72,21 +72,21 @@ class TechnologyTree{
 	static load(){
 		logger.debug("Loading Technology Tree...");
 		const tree = new TechnologyTree("Root");
-		Object.entries(TechData).forEach(([name, data]) => {
+		TechData.forEach((data) => {
 			const category = data.Category.toLowerCase();
 			if(!tree.categories.has(category))
 				tree.categories.set(category, new TechnologyTree(data.Category));
 
-
+			const name = data.Name;
 			const settings = {
 				name:name,
 				description:data.Description,
 				category:data.Category,
 				image:data.Image,
-				levels:data.Level.length
+				levels:data.BCCost ? data.BCCost.length : null
 			};
 
-			delete data.Level;
+			delete data.Name;
 			delete data.Category;
 			delete data.Image;
 			delete data.Description;
@@ -97,6 +97,7 @@ class TechnologyTree{
 			const tech = new Technology(settings);
 			tree.technologies.set(name.toLowerCase(), tech);
 			tree.categories.get(category).get().set(name.toLowerCase(), tech);
+
 		});
 
 		return tree;
