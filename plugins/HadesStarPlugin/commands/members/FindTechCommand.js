@@ -19,6 +19,8 @@ export class FindTechCommand extends MemberCommand {
         if (!args.length) {
             embed.setTitle(`**Known Techs**`)
 
+            console.log(args);
+
             const categories = new Map();
             TechTree.technologies.forEach((tech, name) => {
                 if (!categories.has(tech.category))

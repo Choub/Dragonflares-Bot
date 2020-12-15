@@ -1,8 +1,10 @@
-import { MemberCommand } from './MemberCommand';
-import { TechTree } from '../../techs';
-import { confirmTech } from '../../utils';
-import { Member } from '../../database';
+import { MemberCommand } from '../MemberCommand';
+import { TechTree } from '../../../techs';
+import { confirmTech } from '../../../utils';
+import { Member } from '../../../database';
 import { MessageEmbed } from 'discord.js';
+import * as Fields from './fields';
+import mapping from './mapping.json';
 
 export class TechDataCommand extends MemberCommand{
     constructor(plugin){
@@ -12,6 +14,8 @@ export class TechDataCommand extends MemberCommand{
             description: "Returns info about a certain tech in a certain level.",
             usage: "&techdata (tech) (level). Not stating any tech will show all existing techs, stating a tech will show it's description and max level. Stating a level will give detailed info on it"
         });
+
+        this.fields = new Map(Array.from(Object.entries(Fields)).map(([key, value]) => [key.replace('Field', ''), new value()]));
     }
 
     async run(message, args){
@@ -39,9 +43,10 @@ export class TechDataCommand extends MemberCommand{
             if(isNaN(level)) {
                 embed.setTitle(`**Tech: ${tech.name}**`)
                 embed.setDescription(`${tech.description}\n`)
-                tech.properties.forEach((levels, property) => {
-                    if(!Array.isArray(levels))
-                        embed.addField(`*${property}*`, `${levels}`)
+                tech.properties.forEach((value, property) => {
+                    if(!Array.isArray(value)){
+                        embed.addField(`*${this.getLabel(property)}*`, `${this.getField(property).render(value)}`);
+                    }
                 });
                 embed.setFooter(`You may add a number between 1 and ${tech.levels} to get info about the required level`)
                 embed.setThumbnail(`${tech.image}`)
@@ -58,10 +63,22 @@ export class TechDataCommand extends MemberCommand{
             embed.setThumbnail(tech.image);
 
             tech.properties.forEach((levels, property) => {
-                if(Array.isArray(levels))
-                    embed.addField(`*${property}*`, `${levels[level - 1]}`)
+                if(Array.isArray(levels)){
+                    const field = this.getField(property);
+                    embed.addField(`*${this.getLabel(property)}*`, `${field.render(levels[level - 1])}`, true);
+                }
             });
             return message.channel.send(embed)
         }
+    }
+
+    getLabel(name){
+        return name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/_(\w+)/g, ' ($1)');
+    }
+
+    getField(name){
+        if(mapping.hasOwnProperty(name) && this.fields.has(mapping[name]))
+            return this.fields.get(mapping[name]);
+        return this.fields.get("Default");
     }
 }

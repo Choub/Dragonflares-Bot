@@ -83,7 +83,7 @@ class TechnologyTree{
 				description:data.Description,
 				category:data.Category,
 				image:data.Image,
-				levels:data.BCCost ? data.BCCost.length : null
+				levels:data.InstallPrice ? data.InstallPrice.length : null
 			};
 
 			delete data.Name;
